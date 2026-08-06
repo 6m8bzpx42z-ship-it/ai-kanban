@@ -102,9 +102,10 @@
     <span class="eyebrow">Free · MIT · no npm packages</span>
     <h1>A Kanban board your<br>AI agent can <span>reason about</span></h1>
     <p class="lede">
-      It answers the one question a markdown checklist never can, honestly:
-      <strong>what can I start right now?</strong> Ready and Blocked aren't stored
-      anywhere — they're worked out from the dependency graph every time the board loads.
+      You never mark anything &ldquo;blocked&rdquo; yourself. You just say which card
+      needs which — and the board works out <strong>what you can actually start right
+      now</strong>, every time it loads. Finish something, and whatever it was holding
+      up moves itself.
     </p>
     <div class="cta">
       <a class="btn btn-primary" href="ai-kanban.zip" download>Download the kit</a>
@@ -122,10 +123,10 @@
   <div class="wrap">
     <h2>Close a blocker. The board moves itself.</h2>
     <p class="sub">
-      Nobody maintains a “blocked” flag, because nobody can be trusted to. Close the
-      blocker from the terminal — from another window, from an agent running in the
-      background — and the card it was holding moves on its own, within a couple of
-      seconds, with nothing clicked in the browser.
+      Finish the thing that was in the way — from the terminal, from another window,
+      from an agent running in the background — and the card that was stuck behind it
+      slides into Ready on its own, a second or two later. You don&rsquo;t refresh
+      anything. You don&rsquo;t update a second list.
     </p>
 
     <div class="pair">
@@ -157,16 +158,16 @@
     <p class="sub">Three properties, and the first one is why the rest work.</p>
     <div class="grid">
       <div class="card">
-        <h3>Derived, not stored</h3>
-        <p>Ready and Blocked come from the dependency graph on every load. “What should I do next” stops being a judgement call and becomes a query.</p>
+        <h3>Nothing to keep updated</h3>
+        <p>You never tick a “blocked” box, because nobody remembers to. The board recalculates what&rsquo;s startable every single time it loads.</p>
       </div>
       <div class="card">
-        <h3>Claim before starting</h3>
-        <p>An agent claims a card before it touches code, so two of them don't quietly start the same job and edit the same files.</p>
+        <h3>Agents call dibs</h3>
+        <p>An agent puts its name on a card before it touches any code, so two of them can&rsquo;t quietly start the same job and edit the same files.</p>
       </div>
       <div class="card">
-        <h3>Done leaves evidence</h3>
-        <p>Every closed card carries a written reason — what changed and how it was checked. A wall of “done” is worth nothing three weeks later.</p>
+        <h3>“Done” has to prove it</h3>
+        <p>Closing a card makes you write what changed and how you checked. A wall of “done” with no reasons is worth nothing three weeks later.</p>
       </div>
     </div>
   </div>
@@ -175,15 +176,15 @@
 <section>
   <div class="wrap">
     <h2>Where each column comes from</h2>
-    <p class="sub">Four columns, three stored statuses. The two that matter most are computed.</p>
+    <p class="sub">Only two of these are real statuses you set. The other two the board figures out for you — and they&rsquo;re the two you care about.</p>
     <div class="scroll">
       <table>
-        <thead><tr><th>Column</th><th>Comes from</th><th>Stored or derived</th></tr></thead>
+        <thead><tr><th>Column</th><th>Comes from</th><th>Who decides it</th></tr></thead>
         <tbody>
-          <tr><td><strong>Ready</strong></td><td><code>open</code> and listed by <code>bd ready</code></td><td>derived</td></tr>
-          <tr><td><strong>In Progress</strong></td><td>status <code>in_progress</code></td><td>stored</td></tr>
-          <tr><td><strong>Blocked</strong></td><td><code>open</code> and <em>not</em> listed by <code>bd ready</code></td><td>derived</td></tr>
-          <tr><td><strong>Done</strong></td><td>status <code>closed</code></td><td>stored</td></tr>
+          <tr><td><strong>Ready</strong></td><td>nothing is in its way</td><td>the board</td></tr>
+          <tr><td><strong>In Progress</strong></td><td>you (or an agent) claimed it</td><td>you</td></tr>
+          <tr><td><strong>Blocked</strong></td><td>it&rsquo;s waiting on another card</td><td>the board</td></tr>
+          <tr><td><strong>Done</strong></td><td>you closed it, with a reason</td><td>you</td></tr>
         </tbody>
       </table>
     </div>
