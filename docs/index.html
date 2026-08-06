@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Kanban board your AI agent can reason about</title>
+<meta name="description" content="A Kanban board that reads a beads dependency graph. Ready and Blocked are derived, never stored — close a blocker and the card it was holding moves itself. Free, MIT.">
+<meta property="og:title" content="A Kanban board your AI agent can reason about">
+<meta property="og:description" content="Close a blocker from the terminal and the card it was holding moves itself. No refresh, no second list to maintain.">
+<meta property="og:image" content="https://6m8bzpx42z-ship-it.github.io/ai-kanban/board.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root{
+    --ink:#e8edf4; --dim:#8b98a8; --faint:#5d6b7d;
+    --bg:#080d16; --panel:#0e1520; --line:#1d2836;
+    --green:#2ecc71; --green-deep:#1a8f4c; --amber:#f5c542;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green); text-decoration:none}
+  a:hover{text-decoration:underline}
+  :focus-visible{outline:2px solid var(--green); outline-offset:3px; border-radius:6px}
+  .wrap{max-width:960px; margin:0 auto; padding:0 22px}
+  code,kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+
+  /* ---- hero ---- */
+  header{padding:74px 0 8px; position:relative; overflow:hidden}
+  header::before{
+    content:""; position:absolute; inset:-40% 20% auto; height:460px;
+    background:radial-gradient(closest-side,rgba(46,204,113,.16),transparent);
+    pointer-events:none;
+  }
+  .eyebrow{
+    display:inline-block; font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--green); border:1px solid rgba(46,204,113,.32);
+    padding:5px 11px; border-radius:999px; margin-bottom:20px;
+  }
+  h1{
+    font-size:clamp(30px,5.4vw,52px); line-height:1.08; margin:0 0 16px;
+    letter-spacing:-.02em; text-wrap:balance; font-weight:800;
+  }
+  h1 span{color:var(--green)}
+  .lede{font-size:clamp(17px,2.2vw,20px); color:var(--dim); max-width:62ch; margin:0 0 28px}
+  .cta{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px}
+  .btn{
+    display:inline-block; padding:13px 22px; border-radius:11px; font-weight:700; font-size:15px;
+    border:1px solid transparent; transition:transform .12s ease, background .12s ease;
+  }
+  .btn:hover{text-decoration:none; transform:translateY(-1px)}
+  .btn-primary{background:var(--green); color:#04240f; box-shadow:0 6px 0 var(--green-deep)}
+  .btn-primary:active{transform:translateY(3px); box-shadow:0 3px 0 var(--green-deep)}
+  .btn-ghost{border-color:var(--line); color:var(--ink); background:var(--panel)}
+  .meta{font-size:13px; color:var(--faint)}
+
+  /* ---- shots ---- */
+  figure{margin:34px 0 0}
+  img{max-width:100%; height:auto; display:block; border-radius:12px; border:1px solid var(--line)}
+  figcaption{font-size:13px; color:var(--faint); margin-top:10px}
+  .pair{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  @media (max-width:720px){ .pair{grid-template-columns:1fr} }
+  .tag{
+    display:inline-block; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    padding:3px 8px; border-radius:5px; margin-bottom:8px; font-weight:700;
+  }
+  .tag-before{background:rgba(248,81,73,.14); color:#ff8b82}
+  .tag-after{background:rgba(46,204,113,.14); color:var(--green)}
+
+  /* ---- sections ---- */
+  section{padding:64px 0; border-top:1px solid var(--line)}
+  h2{font-size:clamp(22px,3vw,30px); margin:0 0 12px; letter-spacing:-.01em; text-wrap:balance}
+  .sub{color:var(--dim); max-width:64ch; margin:0 0 26px}
+  .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+  @media (max-width:760px){ .grid{grid-template-columns:1fr} }
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:13px; padding:20px}
+  .card h3{margin:0 0 7px; font-size:16px}
+  .card p{margin:0; color:var(--dim); font-size:14.5px}
+  pre{
+    background:var(--panel); border:1px solid var(--line); border-radius:11px;
+    padding:16px 18px; overflow-x:auto; font-size:13.5px; line-height:1.75; margin:0 0 14px;
+  }
+  pre .c{color:var(--faint)}
+  pre .g{color:var(--green)}
+  ol{padding-left:20px; color:var(--dim)} ol li{margin-bottom:22px} ol li strong{color:var(--ink)}
+  table{width:100%; border-collapse:collapse; font-size:14.5px}
+  th,td{text-align:left; padding:11px 12px; border-bottom:1px solid var(--line)}
+  th{color:var(--faint); font-weight:600; font-size:12px; letter-spacing:.08em; text-transform:uppercase}
+  td:last-child{color:var(--dim)}
+  .scroll{overflow-x:auto}
+  footer{padding:52px 0 72px; border-top:1px solid var(--line); color:var(--faint); font-size:14px}
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow">Free · MIT · no npm packages</span>
+    <h1>A Kanban board your<br>AI agent can <span>reason about</span></h1>
+    <p class="lede">
+      It answers the one question a markdown checklist never can, honestly:
+      <strong>what can I start right now?</strong> Ready and Blocked aren't stored
+      anywhere — they're worked out from the dependency graph every time the board loads.
+    </p>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://github.com/6m8bzpx42z-ship-it/ai-kanban/archive/refs/heads/main.zip">Download the kit</a>
+      <a class="btn btn-ghost" href="https://github.com/6m8bzpx42z-ship-it/ai-kanban">View on GitHub</a>
+    </div>
+    <p class="meta">Next.js · React · TypeScript · needs the <a href="https://github.com/steveyegge/beads"><code>bd</code></a> binary</p>
+
+    <figure>
+      <img src="board.png" alt="The board: Ready, In Progress and Blocked columns, each card showing its ID, priority, type, description, what it frees and what it is waiting on.">
+    </figure>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Close a blocker. The board moves itself.</h2>
+    <p class="sub">
+      Nobody maintains a “blocked” flag, because nobody can be trusted to. Close the
+      blocker from the terminal — from another window, from an agent running in the
+      background — and the card it was holding moves on its own, within a couple of
+      seconds, with nothing clicked in the browser.
+    </p>
+
+    <div class="pair">
+      <figure>
+        <span class="tag tag-before">Before</span>
+        <img src="before.png" alt="Auth sits in the Blocked column, waiting on the database card.">
+        <figcaption>Auth is stuck behind the database card.</figcaption>
+      </figure>
+      <figure>
+        <span class="tag tag-after">A few seconds later</span>
+        <img src="after.png" alt="Auth has moved into Ready with a green arrival glow, showing it frees 2 others.">
+        <figcaption>Nothing was clicked in the browser.</figcaption>
+      </figure>
+    </div>
+
+<pre style="margin-top:26px"><span class="c">$</span> bd close &lt;the-blocker-id&gt; <span class="g">-r</span> "SQLite wired, verified by reading a row back."</pre>
+
+    <p class="sub" style="margin-bottom:0">
+      Then look at what landed: the card that appeared is badged
+      <strong>frees 2 others</strong>. It is worth <em>more</em> than the one you just
+      finished. That's leverage, and it's invisible in a flat list.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Why an agent can use it</h2>
+    <p class="sub">Three properties, and the first one is why the rest work.</p>
+    <div class="grid">
+      <div class="card">
+        <h3>Derived, not stored</h3>
+        <p>Ready and Blocked come from the dependency graph on every load. “What should I do next” stops being a judgement call and becomes a query.</p>
+      </div>
+      <div class="card">
+        <h3>Claim before starting</h3>
+        <p>An agent claims a card before it touches code, so two of them don't quietly start the same job and edit the same files.</p>
+      </div>
+      <div class="card">
+        <h3>Done leaves evidence</h3>
+        <p>Every closed card carries a written reason — what changed and how it was checked. A wall of “done” is worth nothing three weeks later.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Where each column comes from</h2>
+    <p class="sub">Four columns, three stored statuses. The two that matter most are computed.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Column</th><th>Comes from</th><th>Stored or derived</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Ready</strong></td><td><code>open</code> and listed by <code>bd ready</code></td><td>derived</td></tr>
+          <tr><td><strong>In Progress</strong></td><td>status <code>in_progress</code></td><td>stored</td></tr>
+          <tr><td><strong>Blocked</strong></td><td><code>open</code> and <em>not</em> listed by <code>bd ready</code></td><td>derived</td></tr>
+          <tr><td><strong>Done</strong></td><td>status <code>closed</code></td><td>stored</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Get it running</h2>
+    <p class="sub">Four files into an existing Next.js app. No additional npm packages.</p>
+    <ol>
+      <li>
+        <strong>Install beads.</strong> The board reads it and never keeps its own copy of anything.
+<pre><span class="c">$</span> brew install beads
+<span class="c">$</span> cd your-project &amp;&amp; bd init</pre>
+      </li>
+      <li>
+        <strong>Copy the four files in</strong> — the API route, the board page, the component, and the comparator.
+      </li>
+      <li>
+        <strong>Check your <code>@/*</code> alias</strong> points at the same root the files landed in, or swap the imports for relative paths.
+      </li>
+      <li>
+        <strong>Open <code>/board</code>.</strong> Full setup notes, the gotchas that will bite you, and the tests are in the README.
+      </li>
+    </ol>
+    <a class="btn btn-primary" href="https://github.com/6m8bzpx42z-ship-it/ai-kanban/archive/refs/heads/main.zip">Download the kit</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p style="margin:0 0 6px">
+      <strong style="color:var(--ink)">MIT licensed.</strong>
+      Use it, change it, ship it, sell it — commercial or not, no permission needed.
+    </p>
+    <p style="margin:0 0 6px">
+      Built by <strong style="color:var(--ink)">DTECH</strong>. It reads
+      <a href="https://github.com/steveyegge/beads">beads</a>, which is not mine —
+      that's Steve Yegge's project and it's worth a look on its own.
+    </p>
+    <p style="margin:0">A link back is appreciated but never required.</p>
+  </div>
+</footer>
+
+</body>
+</html>
